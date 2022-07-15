@@ -3,7 +3,7 @@ require "pry-byebug"
 class Players
     attr_reader :username, :weapon
     attr_accessor :turn
-  def initialize(username, weapon, turn)
+  def initialize(username, weapon)
     @username = username
     @weapon = weapon
     @turn = 1
@@ -69,11 +69,11 @@ end
 
 def print_board(board, winner=nil, loser=nil)
   if winner
-    5.times {puts}
+    2.times {puts}
     puts "winner: #{winner.username}"
     puts "loser: #{loser.username}"
   else
-    5.times {puts}
+    2.times {puts}
     puts "winner: "
     puts "loser: "
   end
@@ -88,25 +88,40 @@ def print_board(board, winner=nil, loser=nil)
 
 end
 
+
+#sign player one in
 puts "Player1, enter your username"
 username1 = gets.chomp
-puts "And your weapon"
+puts "And your weapon: X or O"
 weapon1 = gets.chomp
+
+while weapon1 != "X" && weapon1 != "O"
+  puts "Please pick either X or O"
+  weapon1 = gets.chomp
+end 
+
+# sign player two in
+2.times {puts}
 puts "Player2, enter your username"
 username2 = gets.chomp
-puts "And your weapon"
-weapon2 = gets.chomp
 
-player1 = Players.new(username1, weapon1, true)
-player2 = Players.new(username2, weapon2, false)
-current_player = player1
+# assign second weapon to second player
+weapons = ["X", "O"]
+weapon2 = weapons[1] if weapon1 == weapons[0]
+weapon2 = weapons[0] if weapon1 == weapons[1]
+puts "your weapon is #{weapon2}"
+
+# Create players
+player1 = Players.new(username1, weapon1)
+player2 = Players.new(username2, weapon2)
 
 board = GameBoard.new
 game_over = false
 
+# initiate the game
 while !game_over    
 
-
+  # pick the player that gets to play this round
   if player1.turn == player2.turn
     current_player = player1
     other_player = player2
@@ -117,22 +132,34 @@ while !game_over
 
   print_board(board.board)
 
+  # pick a weapon and store player's choice
   puts "#{current_player.username} pick a cell"
-  cell = gets  
+  cell = gets.chomp.to_i
 
+  # check whether the player is cooperating
+  while cell < 1 || cell > 9
+    puts "#{current_player.username} pick a REAL cell! Please."
+    cell = gets.chomp.to_i
+  end
+
+  # store player's move
   board.board[cell.to_i - 1] = current_player.weapon
 
+  # start checking rounds for a winner after enough moves
   if player1.turn > 2
     game_over = check_round(board.board, current_player.weapon)
   end
 
+  # pick wich one gets to pop champagne
   if game_over
     board.winner = current_player
     board.loser = other_player
   end
 
-  print_board(board.board, board.winner, board.loser)
+  # print the board one last time with winner and loser
+  print_board(board.board, board.winner, board.loser) if board.winner
 
+  # update turns
   current_player.turn += 1
 end
 
