@@ -49,7 +49,6 @@ def check_round(board, weapon)
     results[distance] += 1
     results
   end
-  p reduced_distances
 
   check_distances = reduced_distances.map do |key, value|
     if value == 2 && key == 2
@@ -83,9 +82,17 @@ def print_board(board, winner=nil, loser=nil)
   puts "          #{board[3]} | #{board[4]} | #{board[5]}"
   puts "          --+---+--"
   puts "          #{board[6]} | #{board[7]} | #{board[8]}"
+end
 
-
-
+def check_board(board)
+  board.map do |cell| 
+    if cell.to_i > 0 && cell.to_i < 10
+      return false
+    end
+  end
+  2.time {puts}
+  puts "It's a tie!"
+  true
 end
 
 
@@ -119,7 +126,12 @@ board = GameBoard.new
 game_over = false
 
 # initiate the game
-while !game_over    
+while !game_over   
+  #check whether the board is full
+  if check_board(board.board)
+    game_over = true
+    break;
+  end
 
   # pick the player that gets to play this round
   if player1.turn == player2.turn
@@ -137,13 +149,13 @@ while !game_over
   cell = gets.chomp.to_i
 
   # check whether the player is cooperating
-  while cell < 1 || cell > 9
-    puts "#{current_player.username} pick a REAL cell! Please."
+  while (board.board[cell - 1].to_i == 0) || (cell < 1 || cell > 9)
+    puts "#{current_player.username} pick a REAL empty cell! Please."
     cell = gets.chomp.to_i
   end
 
   # store player's move
-  board.board[cell.to_i - 1] = current_player.weapon
+  board.board[cell - 1] = current_player.weapon
 
   # start checking rounds for a winner after enough moves
   if player1.turn > 2
